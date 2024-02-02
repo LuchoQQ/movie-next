@@ -1,3 +1,4 @@
+"use server"
 const axios = require('axios');
 
 

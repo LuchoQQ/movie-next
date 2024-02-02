@@ -1,25 +1,12 @@
-'use client'
-import useMoviesStore from '@/lib/store';
-import { getMovies } from '@/utils/api';
-import { useQuery } from '@tanstack/react-query';
-import React from 'react';
+"use client";
 
-
+import { useMovies } from "@/hooks/useMovies";
+import React from "react";
 
 export const ListMovies: React.FC = () => {
-    const { searchTerm, movies }: any = useMoviesStore()
+    const { data: movies, isLoading } = useMovies();
 
-    const { data } = useQuery({
-        queryKey: ['movies'],
-        queryFn: () => getMovies(),
-        initialData: movies,
-    })
-
-    console.log(data, 'data')
-
-    return (
-        <>
-        
-        </>
-    );
+    console.log(movies, 'movies')
+    return <></>;
 };
+

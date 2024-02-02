@@ -1,10 +1,10 @@
 
-import Main from "@/components/Main";
+import { ListMovies } from "./list-movies";
 
-export default function Home() {
+export default async function Home() {
     return (
         <>
-            <Main />
+            <ListMovies />
         </>
     );
 }
