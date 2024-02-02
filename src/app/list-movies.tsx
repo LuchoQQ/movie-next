@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { getMovies, searchMovie } from "@/utils/api";
 import useMoviesStore from "@/lib/store";
 import { Search } from "lucide-react";
-interface Movie {
+export interface Movie {
     adult: boolean;
     backdrop_path: string;
     genre_ids: number[];
@@ -30,6 +30,9 @@ interface Movie {
 
 export const ListMovies: React.FC = () => {
     const { data: movies, isLoading } = useMovies();
+    console.log(movies)
+
+
     const setMovies = useMoviesStore((state: any) => state.setMovies);
     const setSearch = useMoviesStore((state: any) => state.setSearch);
     const search = useMoviesStore((state: any) => state.search);

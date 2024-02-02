@@ -7,11 +7,10 @@ import { useEffect } from 'react';
 
 export const useMovies = () => {
     const movies = useMoviesStore((state: any) => state.movies || []); // Proporciona un valor predeterminado
-    const setMovies = useMoviesStore((state: any) => state.setMovies);
     const search = useMoviesStore((state: any) => state.search)
 
     const { data, error, isLoading } = useQuery({
-        queryKey: ['movies'],
+        queryKey: ['movies', search],
         queryFn: () => {
             if (search !== '') {
                 console.log(search, 'search')
@@ -23,19 +22,7 @@ export const useMovies = () => {
             }
         },
         initialData: movies,
-        enabled: movies.length === 0,
     });
 
-
-    useEffect(() => {
-        if (movies.length > 0) {
-            setMovies(movies)
-        } else {
-            if (data?.length > 0) {
-                setMovies(data);
-            }
-        }
-    }, [data, setMovies]);
-
-    return { data: movies, error, isLoading };
+    return { data: data, error, isLoading };
 };
