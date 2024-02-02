@@ -1,6 +1,7 @@
 import useMoviesStore from '@/lib/store';
 import { getMovies } from '@/utils/api'
 import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react';
 
 
 
@@ -11,11 +12,15 @@ export const useMovies = () => {
     const { data, error, isLoading } = useQuery({
         queryKey: ['movies'],
         queryFn: () => getMovies(),
-        initialData: movies.length > 0 ? movies : [], // Usa movies como datos iniciales si ya están cargados
+        initialData: movies.length > 0 ? movies : [], 
     });
 
-    // Devuelve data desde el estado si está disponible, de lo contrario, desde la consulta
-    const finalData = movies.length > 0 ? movies : data;
+    useEffect(() => {
+        if (movies.length === 0 && data) {
+            setMovies(data);
+        }
+    }, [data, movies.length, setMovies]);
 
-    return { data: finalData, error, isLoading };
+
+    return { data: movies, error, isLoading };
 }
