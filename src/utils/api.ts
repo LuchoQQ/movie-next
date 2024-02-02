@@ -1,4 +1,7 @@
 "use server"
+
+import { headers } from "next/headers";
+
 const axios = require('axios');
 
 
@@ -18,4 +21,8 @@ export const getMovies = async () => {
             return res.data.results
         })
         .catch((err: any) => console.log(err));
+}
+
+export const searchMovie = async (search: string) => {
+    return await axios.get(`https://api.themoviedb.org/3/search/movie?query=${search}&include_adult=false&language=en-US&page=1`, { headers: { 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyZmVkYzc5MWM2ZmY0ZDk1ZDJlODVhNjE1MmE1MDlkNCIsInN1YiI6IjYyNjYwYjFlZDFhODkzNzA5NGM0Y2NlYyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.64GVh7kzByzkpYfMrvjrK7Pk8NNXYqnJPINleBZWARs' } }).then((res: any) => res.data.results).catch((err: any) => console.log(err))
 }

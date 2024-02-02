@@ -3,7 +3,7 @@
 const nextConfig = {
     reactStrictMode: true,
     images: {
-        domains: ["image.tmdb.org"], // Agrega aquí los dominios de las imágenes que quieres permitir
+        domains: ["image.tmdb.org", "res.cloudinary.com"], // Agrega aquí los dominios de las imágenes que quieres permitir
     },
 };
 

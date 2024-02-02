@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 const useMoviesStore = create(persist((set, get) => ({
-    movies: [],
+    //@ts-ignore
+    movies: typeof window !== "undefined" ? JSON.parse(localStorage.getItem('movies')) || [] : [],
     search: '',
     setSearch: (str: any) => set({ search: str }),
     setMovies: (movies: any) => set({ movies }),

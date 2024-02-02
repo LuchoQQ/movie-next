@@ -1,6 +1,5 @@
 /* eslint-disable */
 import Image from "next/image";
-import { forwardRef } from "react";
 import { ThumbsUpIcon } from "lucide-react";
 
 const Thumbnail = ({ result }: any) => {
@@ -15,8 +14,9 @@ const Thumbnail = ({ result }: any) => {
                     <Image
                         src={`https://res.cloudinary.com/diylksocz/image/upload/v1653600542/No-image-found_dlyvql.jpg`}
                         alt="Image not found"
-                        height={1080}
-                        width={1920}
+                        height={500}
+                        width={400}
+                        style={{ width: '20rem', height: '10.5rem', objectFit: 'contain' }}
                     />
                 ) : (
                     <Image
