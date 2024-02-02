@@ -1,28 +1,37 @@
-/* eslint-disable */
+import React from "react";
 import Image from "next/image";
 import { ThumbsUpIcon } from "lucide-react";
+import { Movie } from "@/app/list-movies";
 
-const Thumbnail = ({ result }: any) => {
+interface Props {
+    result: Movie;
+}
+const Thumbnail = React.forwardRef<HTMLDivElement, Props>(({ result }, ref) => {
     const BASE_URL = "https://image.tmdb.org/t/p/original/";
-
 
     return (
         <>
-            {/* MOVIE ITEM */}
-            <div className="p-2 group cursor-pointer transition duration-200 ease-in transform sm:hover:scale-105 hover:z-50">
+            <div
+                ref={ref}
+                className="p-2 group cursor-pointer transition duration-200 ease-in transform sm:hover:scale-105 hover:z-50"
+            >
                 {!result.backdrop_path || !result.poster_path ? (
                     <Image
                         src={`https://res.cloudinary.com/diylksocz/image/upload/v1653600542/No-image-found_dlyvql.jpg`}
                         alt="Image not found"
                         height={500}
                         width={400}
-                        style={{ width: '20rem', height: '10.5rem', objectFit: 'contain' }}
+                        style={{
+                            width: "20rem",
+                            height: "10.5rem",
+                            objectFit: "contain",
+                        }}
                     />
                 ) : (
                     <Image
                         src={`${
-                            BASE_URL + result.backdrop_path ||
-                            BASE_URL + result.poster_path
+                            BASE_URL +
+                            (result.backdrop_path || result.poster_path)
                         }`}
                         height={500}
                         width={400}
@@ -40,17 +49,19 @@ const Thumbnail = ({ result }: any) => {
                     </h2>
 
                     <div className="flex items-center opacity-0 group-hover:opacity-100 text-white">
-                        <p className="text-white">
-                            {result.media_type && `${result.media_type} •`}{" "}
-                        </p>
-                        {result.release_date || result.first_air_date} •{" "}
-                        <ThumbsUpIcon className="h-5 mx-2" />{" "}
+                        {result.media_type && (
+                            <p className="text-white">{result.media_type} • </p>
+                        )}
+                        {result.release_date || result.first_air_date} •
+                        <ThumbsUpIcon className="h-5 mx-2" />
                         {result.vote_count}
                     </div>
                 </div>
             </div>
         </>
     );
-};
+});
+Thumbnail.displayName = 'Thumbnail';
+
 
 export default Thumbnail;

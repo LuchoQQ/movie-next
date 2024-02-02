@@ -3,14 +3,14 @@
 import Thumbnail from "@/components/Thumbnail";
 import { Input } from "@/components/ui/input";
 import { useMovies } from "@/hooks/useMovies";
-import Image from "next/image";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getMovies, searchMovie } from "@/utils/api";
 import useMoviesStore from "@/lib/store";
 import { Search } from "lucide-react";
+import { useIntersection } from "@mantine/hooks";
 export interface Movie {
     adult: boolean;
     backdrop_path: string;
@@ -26,80 +26,117 @@ export interface Movie {
     video: boolean;
     vote_average: number;
     vote_count: number;
+    first_air_date: string;
+    media_type: string;
+    original_name: string;
 }
 
 export const ListMovies: React.FC = () => {
-    const { data: movies, isLoading } = useMovies();
-    console.log(movies)
+    const { data: movies, fetchNextPage } = useMovies();
 
+    const setMovies = useMoviesStore((state) => state.setMovies);
+    const setSearch = useMoviesStore((state) => state.setSearch);
+    const search = useMoviesStore((state) => state.search);
 
-    const setMovies = useMoviesStore((state: any) => state.setMovies);
-    const setSearch = useMoviesStore((state: any) => state.setSearch);
-    const search = useMoviesStore((state: any) => state.search);
+    const onReset = async () => {
+        const res = await getMovies(1);
+        setMovies(res.movies);
+        setSearch("");
+    };
 
-    const schema = z.object({
+    const lastPostRef = useRef<HTMLElement>(null);
+    const { ref, entry } = useIntersection({
+        root: lastPostRef.current,
+        threshold: 1,
+    });
+
+    useEffect(() => {
+        if (entry?.isIntersecting) fetchNextPage();
+    }, [entry, fetchNextPage]);
+
+    const searchSchema = z.object({
         search: z
             .string()
             .min(1, { message: "Required" })
             .max(10, { message: "Max 10 characters" }),
     });
 
+    type SearchFormValue = z.infer<typeof searchSchema>;
+
     const {
-        control,
         handleSubmit,
         formState: { errors },
         setValue,
-    } = useForm({
-        resolver: zodResolver(schema),
+        control,
+    } = useForm<SearchFormValue>({
+        resolver: zodResolver(searchSchema),
     });
 
-    useEffect(() => {
-        setValue("search", search);
-    }, [search, setSearch]);
-
-    const onSubmit = async (data: string) => {
-        const res = await searchMovie(data.search);
-        setMovies(res);
+    const onSubmit = async (data: SearchFormValue) => {
+        const res = await searchMovie(data.search, 1);
+        setMovies(res.movies);
         setSearch(data.search);
     };
 
-    const onReset = async () => {
-        const res = await getMovies()
-        setMovies(res)
-        setSearch('')
-    }
+    useEffect(() => {
+        setValue("search", search);
+    }, [search, setSearch, setValue]);
 
-    console.log(search);
     return (
         <>
             <nav className="flex bg-zinc-950 px-5 py-10 gap-4">
-            <form onSubmit={handleSubmit(onSubmit)} className="flex items-center">
-            <Controller
-                name="search"
-                defaultValue={search} // Inicializa el campo con el valor de 'search' del estado
-                control={control}
-                render={({ field }) => <Input {...field} placeholder="Search movies..."/>}
-            />
-            <button type="submit" className="ml-4 flex items-center justify-center p-2  hover:bg-red-700 transition-all text-white text-xl rounded">
-                <Search /> {/* Asume un componente de ícono de búsqueda */}
-            </button>
-            {errors.search && <p className="text-red-500 ml-4">{errors.search.message}</p>}
-        </form>
-                <button className="text-white" onClick={onReset}>Reset</button>
-
+                <form
+                    onSubmit={handleSubmit(onSubmit)}
+                    className="flex items-center"
+                >
+                    <Controller
+                        name="search"
+                        defaultValue={search}
+                        control={control}
+                        render={({ field }) => (
+                            <Input {...field} placeholder="Search movies..." />
+                        )}
+                    />
+                    <button
+                        type="submit"
+                        className="ml-4 flex items-center justify-center p-2  hover:bg-red-700 transition-all text-white text-xl rounded"
+                    >
+                        <Search />
+                    </button>
+                    {errors.search && (
+                        <p className="text-red-500 ml-4">
+                            {errors.search.message}{" "}
+                        </p>
+                    )}
+                </form>
+                <button className="text-white" onClick={onReset}>
+                    Reset
+                </button>
             </nav>
 
             {movies?.length !== 0 ? (
                 <div className="px-5 sm:grid md:grid-cols-2 xl:grid-cols-4 3xl:flex flex-wrap justify-center bg-zinc-950">
-                    {movies?.map((result: Movie) => (
-                        <Thumbnail key={result.id} result={result} />
-                    ))}
+                    {movies?.map((result: Movie, index: number) => {
+                        // Corrected condition to correctly assign ref to the last item
+                        if (index === movies.length - 1)
+                            return (
+                                <Thumbnail
+                                    key={result.id}
+                                    result={result}
+                                    ref={ref}
+                                />
+                            );
+                        return <Thumbnail key={result.id} result={result} />;
+                    })}
                 </div>
             ) : (
                 <div className="flex justify-center align-center mt-80 mb-52 ">
                     <p className="text-4xl min-h-700	">No results!</p>
                 </div>
             )}
+            <div className="flex bg-zinc-950 py-4 justify-center item-center text-3xl text-white font-bold">
+                ...Loading
+            </div>
         </>
     );
 };

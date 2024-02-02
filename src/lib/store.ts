@@ -1,14 +1,21 @@
+import { Movie } from '@/app/list-movies';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-const useMoviesStore = create(persist((set, get) => ({
-    //@ts-ignore
-    movies: typeof window !== "undefined" ? JSON.parse(localStorage.getItem('movies')) || [] : [],
+interface MoviesState {
+    movies: Movie[];
+    search: string;
+    setMovies: (movies: Movie[]) => void;
+    setSearch: (search: string) => void;
+}
+
+const useMoviesStore = create(persist<MoviesState>((set, get) => ({
+    movies: [],
     search: '',
     setSearch: (str: any) => set({ search: str }),
-    setMovies: (movies: any) => set({ movies }),
+    setMovies: (movies: Movie[]) => set({ movies }),
 }), {
-    name: "movies-store", // El nombre de tu almacenamiento en localStorage
+    name: "movies-store",
 }));
 
 export default useMoviesStore;

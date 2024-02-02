@@ -1,28 +1,30 @@
 import useMoviesStore from '@/lib/store';
-import { getMovies, searchMovie } from '@/utils/api'
-import { useQuery } from '@tanstack/react-query'
-import { useEffect } from 'react';
-
+import { searchMovie } from '@/utils/api'
+import { useInfiniteQuery } from '@tanstack/react-query'
 
 
 export const useMovies = () => {
-    const movies = useMoviesStore((state: any) => state.movies || []); // Proporciona un valor predeterminado
-    const search = useMoviesStore((state: any) => state.search)
+    const search = useMoviesStore((state: any) => state.search);
 
-    const { data, error, isLoading } = useQuery({
+    const initialPage = 1
+    const {
+        data: movies,
+        error,
+        fetchNextPage,
+        isLoading,
+        isFetchingNextPage
+    } = useInfiniteQuery({
         queryKey: ['movies', search],
-        queryFn: () => {
-            if (search !== '') {
-                console.log(search, 'search')
-                return searchMovie(search)
-            } else {
-                console.log(search, 'No search')
-
-                return getMovies()
-            }
+        queryFn: async ({ pageParam = initialPage }) => {
+            const res = await searchMovie(search, pageParam)
+            return res
         },
-        initialData: movies,
+        getNextPageParam: (lastPage, allPages) => {
+            return lastPage.nextCursor
+        },
+        initialPageParam: initialPage
     });
 
-    return { data: data, error, isLoading };
+
+    return { data: movies?.pages.flatMap((page: any) => page.movies), error, isLoading, fetchNextPage, isFetchingNextPage };
 };
